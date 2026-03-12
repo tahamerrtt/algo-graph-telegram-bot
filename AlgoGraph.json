@@ -1,0 +1,261 @@
+{
+  "name": "Algorithm Architect",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        -80
+      ],
+      "id": "dcdf5957-2380-4c36-85a1-99389de9792a",
+      "name": "Telegram Trigger",
+      "webhookId": "cebbdd87-ac42-4940-87ce-dbd8b2bd1f0d",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZRAgIGPN4wjYITep",
+          "name": "AlgoGraph"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "Sen bir algoritma analiz ve ayrıştırma uzmanısın. Görevin, kullanıcının sana gönderdiği herhangi bir algoritmayı, süreci veya iş akışını mantıksal adımlara bölmek ve yapılandırılmış JSON formatında döndürmektir ve bu veriyi bir sonraki ai agentin her adim icin ayri görseller oluşturması icin prompt yaz.\n\n## TEMEL KURALLAR\n\n1. YALNIZCA geçerli JSON döndür. Hiçbir açıklama, giriş cümlesi, özet veya markdown code block yazma.\n2. İlk karakter \"[\" olmalı, son karakter \"]\" olmalı. Bunların dışında hiçbir şey olmamalı.\n3. Kullanıcı Türkçe yazarsa Türkçe, İngilizce yazarsa İngilizce yanıt ver.\n4. Eğer kullanıcının gönderdiği metin bir algoritma veya süreç değilse, şu JSON'u döndür:\n   [{\"error\": true, \"message\": \"Geçerli bir algoritma veya süreç bulunamadı.\"}]\n\n## ADIM OLUŞTURMA KURALLARI\n\n- Minimum 3, maksimum 10 adım oluştur.\n- Her adım tek bir sorumluluğa sahip olmalı. Birden fazla işi tek adımda birleştirme.\n- Adımlar birbiriyle mantıksal sırada bağlantılı olmalı.\n- Çok genel veya çok detaylı olma. Orta düzey soyutlama kullan.\n- Döngüler, koşullar ve karar noktaları ayrı adımlar olarak belirtilmeli.\n- Başlangıç ve bitiş adımları her zaman eklenebilir ama zorunlu değil.\n\n## ADIM TİPLERİ\n\nHer adım için aşağıdaki type değerlerinden birini seç:\n\n- START → Algoritmanın başlangıç noktası\n- INPUT → Kullanıcıdan veya dış kaynaktan veri alımı\n- PROCESS → Hesaplama, dönüştürme, işleme adımı\n- DECISION → Koşul kontrolü, if/else, karşılaştırma\n- LOOP → Döngü başlangıcı veya tekrar eden bir işlem\n- OUTPUT → Sonuç üretme, ekrana yazdırma, dosyaya yazma\n- VALIDATION → Girdi doğrulama, hata kontrolü\n- END → Algoritmanın bitiş noktası\n\n## ÇIKTI FORMATI\n\n[\n  {\n    \"stepNumber\": 1,\n    \"title\": \"Kısa ve net başlık (maksimum 6 kelime)\",\n    \"description\": \"Bu adımın ne yaptığını açıklayan 1-2 cümle. Teknik ama anlaşılır ol.\",\n    \"type\": \"START | INPUT | PROCESS | DECISION | LOOP | OUTPUT | VALIDATION | END\",\n    \"inputs\": [\"bu adıma giren veri veya değer (varsa)\"],\n    \"outputs\": [\"bu adımdan çıkan veri veya değer (varsa)\"],\n    \"notes\": \"Varsa dikkat edilmesi gereken özel durum, edge case veya önemli not. Yoksa boş string bırak.\"\n  }\n]\n\n## ÖRNEK\n\nKullanıcı girdisi: \"Kullanıcı adı ve şifre ile giriş yapma süreci\"\n\nBeklenen çıktı:\n[\n  {\n    \"stepNumber\": 1,\n    \"title\": \"Giriş Formunu Göster\",\n    \"description\": \"Kullanıcıya kullanıcı adı ve şifre alanlarından oluşan giriş formu sunulur.\",\n    \"type\": \"INPUT\",\n    \"inputs\": [],\n    \"outputs\": [\"kullanıcı_adı\", \"şifre\"],\n    \"notes\": \"\"\n  },\n  {\n    \"stepNumber\": 2,\n    \"title\": \"Girdi Alanlarını Doğrula\",\n    \"description\": \"Kullanıcı adı ve şifre alanlarının boş olup olmadığı kontrol edilir.\",\n    \"type\": \"VALIDATION\",\n    \"inputs\": [\"kullanıcı_adı\", \"şifre\"],\n    \"outputs\": [\"doğrulama_sonucu\"],\n    \"notes\": \"Boş alan varsa kullanıcıya hata mesajı göster, forma geri dön.\"\n  },\n  {\n    \"stepNumber\": 3,\n    \"title\": \"Veritabanında Kullanıcıyı Ara\",\n    \"description\": \"Girilen kullanıcı adına sahip kayıt veritabanında sorgulanır.\",\n    \"type\": \"PROCESS\",\n    \"inputs\": [\"kullanıcı_adı\"],\n    \"outputs\": [\"kullanıcı_kaydı\"],\n    \"notes\": \"Kullanıcı bulunamazsa hata mesajı döndür.\"\n  },\n  {\n    \"stepNumber\": 4,\n    \"title\": \"Şifre Eşleşiyor mu?\",\n    \"description\": \"Girilen şifre, veritabanındaki hash'lenmiş şifre ile karşılaştırılır.\",\n    \"type\": \"DECISION\",\n    \"inputs\": [\"şifre\", \"kullanıcı_kaydı\"],\n    \"outputs\": [\"eşleşme_durumu\"],\n    \"notes\": \"Şifre düz metin olarak karşılaştırılmamalı, mutlaka hash karşılaştırması yapılmalı.\"\n  },\n  {\n    \"stepNumber\": 5,\n    \"title\": \"Oturum Aç ve Yönlendir\",\n    \"description\": \"Doğrulama başarılıysa kullanıcı oturumu oluşturulur ve ana sayfaya yönlendirilir.\",\n    \"type\": \"OUTPUT\",\n    \"inputs\": [\"eşleşme_durumu\"],\n    \"outputs\": [\"oturum_token\"],\n\n  }\n]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -80,
+        -80
+      ],
+      "id": "cd5c2a7e-8334-4652-9ac8-e6a0fc310090",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        144
+      ],
+      "id": "d99afcc5-0fed-4212-9d6d-c0d2e75c33fb",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "HBRjCa4f286e448n",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        144
+      ],
+      "id": "bbfbbedf-681d-4bf4-ade0-5802486d4eee",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.output;\nconst steps = JSON.parse(output);\n\nlet prompt = \"A clean professional flowchart diagram showing an algorithm. White background, colorful rounded boxes, arrows between steps, modern flat design. Steps: \";\n\nsteps.forEach((step, i) => {\n  prompt += `${i + 1}. ${step.title}. `;\n});\n\nreturn [{\n  json: {\n    prompt: prompt,\n    chatId: $('Telegram Trigger').first().json.message.chat.id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        -80
+      ],
+      "id": "bdeabd2d-3ddc-477c-9838-3d097c92065e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "api"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"dall-e-3\",\n  \"prompt\": \"={{ $json.prompt }}\",\n  \"n\": 1,\n  \"size\": \"1792x1024\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        496,
+        -80
+      ],
+      "id": "b9420544-e26e-4bf3-8472-fb5a868f5403",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const imageUrl = $input.first().json.data[0].url;\nconst chatId = $('Code in JavaScript').first().json.chatId;\n\n// Görseli indir\nconst imgResponse = await helpers.httpRequest({\n  method: 'GET',\n  url: imageUrl,\n  returnFullResponse: true,\n  encoding: 'arraybuffer'\n});\n\nconst base64 = Buffer.from(imgResponse.body).toString('base64');\n\n// imgbb'ye yükle\nconst imgbbResponse = await helpers.httpRequest({\n  method: 'POST',\n  url: 'https://api.imgbb.com/1/upload',\n  returnFullResponse: true,\n  body: {\n    key: 'your_key',\n    image: base64\n  },\n  headers: {\n    'Content-Type': 'application/x-www-form-urlencoded'\n  }\n});\n\nconst publicUrl = imgbbResponse.body.data.url;\n\nreturn [{\n  json: {\n    chatId: chatId,\n    imageUrl: publicUrl\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -80
+      ],
+      "id": "554a29d8-a2f2-4d21-8060-fa76325993d0",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.imageUrl }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        -80
+      ],
+      "id": "c239a75f-ddae-4c77-b223-a1e789c5ec5e",
+      "name": "Send a text message",
+      "webhookId": "b26a93c7-b84c-41d4-a9e3-3548860d4b1c",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZRAgIGPN4wjYITep",
+          "name": "AlgoGraph"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cd4591a2-d87c-467e-a1d6-e879da082037",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "895b62fa2739f068520231b45f296e1b6d84db11fe05de3be0cfc5e32c2eac35"
+  },
+  "id": "O0GtSNEvBO7HvTW5",
+  "tags": []
+}
